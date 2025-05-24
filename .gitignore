@@ -1,0 +1,26 @@
+# Environment files
+.env
+*.env
+
+# Word documents
+*.doc
+*.docx
+
+# PDF files
+*.pdf
+
+# Image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
