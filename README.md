@@ -1,4 +1,4 @@
-# LangChain-and-GigaChat
+# AI Agent,  LangChain and GigaChat
 
 ```powershell
 python -m venv env
