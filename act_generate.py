@@ -12,16 +12,10 @@ from langchain_core.tools import BaseTool, tool
 from langchain_gigachat.chat_models import GigaChat
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
-from mail import fetch_recent_emails
 
 
 load_dotenv(find_dotenv())
-model = GigaChat(
-    model="GigaChat-2-Max",
-    verify_ssl_certs=False,
-)
-
-PATH_FILE = "C:/Users/smoly/LangChain/LangChain-and-GigaChat/Zadanie-5-Obrazets-akta-1-1.png"
+PATH_FILE = "C:/Users/smoly/LangChain/LangChain-and-GigaChat/ООО_реквизиты_Маркетсистемс.docx"
 
 @dataclass
 class Bank:
@@ -29,7 +23,7 @@ class Bank:
     name: str  # наименование банка
     current_account: str  # расчётный счёт
     corporate_account: str  # корреспондентский счёт
-
+    BIC: str  # БИК банка
 @dataclass
 class Customer:
     """Заказчик"""
@@ -51,6 +45,7 @@ class Job:
     price_nds_18: int  # стоимость с НДС 18%
     price_nds_10: int  # стоимость с НДС 10%
 
+@tool
 def generate_pdf_act(customer: Customer, jobs: list[Job]) -> None:
     """
     Генерирует PDF-акт, в котором заполнены данные
@@ -63,7 +58,26 @@ def generate_pdf_act(customer: Customer, jobs: list[Job]) -> None:
     Returns:
         None
     """
-    print(f"generate_pdf_act({asdict(customer)}, {list(map(lambda j: asdict(j), jobs))})")
+    # print(f"generate_pdf_act({asdict(customer)}, {list(map(lambda j: asdict(j), jobs))})")
+    act_json = {
+        "customer": asdict(customer),
+        "jobs": list(map(
+            lambda j: asdict(j), jobs
+        ))
+    }
+    with open(os.path.join("C:/Users/smoly/LangChain/LangChain-and-GigaChat/typst", "act.json"), "w", encoding="utf-8") as f:
+        json.dump(act_json, f, ensure_ascii=False)
+    command = ["typst", "compile", "--root", "./typst", "typst/act.typ"]
+    try:
+        subprocess.run(command,
+               check=True,
+               stdout=subprocess.PIPE,
+               stderr=subprocess.PIPE,
+               text=True,
+               encoding="utf-8")
+    except subprocess.CalledProcessError as e:
+        print(e.stderr)
+
 
 class LLMAgent:
     def __init__(self, model: LanguageModelLike, tools: Sequence[BaseTool]):
@@ -99,21 +113,20 @@ class LLMAgent:
             config=self._config)["messages"][-1].content
     
 def main():
+
+    # более простой промпт для запуска (пробного)
     system_prompt = (
-        "Твоя задача спросить у пользователя, что он хочет сгенерировать — акт или счёт или оба документа. "
-        "Затем нужно сгенерировать акт или счёт, для этого тебе надо взять реквизиты "
-        "контрагента из приложенного файла, а также запроси работы для включения в "
-        "акт (наименования задач и их стоимость), работ может быть несколько. "
-        "Если пользователь указывает в качетсве работы курс, то для документов берём одну работу, в точности такую "
-        "/'Услуги по подготовке товара к продаже/', стоимостью 1750 руб."
-        "Никакие данные не придумывай, всё необходимое строго запроси у "
-        "пользователя. Мои реквизиты заказчика не запрашивай, они есть в моём коде. "
-        "Имя и отчество подписанта сокращаем до одной первой буквы, "
-        "например, Иванов А.Е. "
-        "Название компании оборачиваем в кавычки ёлочкой, например, "
-        "ООО «Рога и копыта», то есть до названия компании ставим « и после названия "
-        "ставим »."
+        "Твоя задача сгенерировать акт, для этого тебе надо будет взять реквизиты"
+        "контрагента из приложенного файла, и ещё запроси работы для включения в акт"
+        "(наименование задач и их стоимость) работ может быть несколько будь готов к "
+        "любому варианту генерировать — акт. Никакие данные придумывать не надо, всё "
+        "необходимое запроси у пользователя. Имя и Отчество подписанта сокращай до "
+        "одной буквы, например Иванов И.И. "
+        "Название компании оборачиваем в кавычки ёлочкой, например, ООО «Рога и копыта»,"
+        "то есть до названия компании ставим « и после названия ставим »."
     )
+
+
     model = GigaChat(
     model="GigaChat-2-Max",
     verify_ssl_certs=False,
@@ -132,4 +145,4 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\nПока, буду ждать ещё!")
+        print("/nПока, буду ждать ещё!")

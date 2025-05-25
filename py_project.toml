@@ -1,0 +1,12 @@
+[project]
+name = "langchain-gigachat-tests"
+version = "0.1.0"
+description = "add"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "langchain>=0.3.25",
+    "langchain-gigachat>=0.3.10",
+    "langgraph>=0.4.7",
+    "python-dotenv>=1.1.0",
+]
