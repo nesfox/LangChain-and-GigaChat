@@ -20,6 +20,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from mail import fetch_recent_emails
 
 
+
 load_dotenv(find_dotenv())
 # PATH_FILE = "ООО_реквизиты_Маркетсистемс.docx"
 
